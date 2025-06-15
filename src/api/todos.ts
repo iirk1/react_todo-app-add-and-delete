@@ -8,11 +8,13 @@ export const getTodos = () => {
 };
 
 export const postTodos = (title: string) => {
-  return client.post(`/todos?userId=${USER_ID}`, {
+  return client.post(`/todos`, {
     userId: USER_ID,
     title,
     completed: false,
   });
 };
 
-// Add more methods here
+export const deleteTodos = (id: number) => {
+  return client.delete(`/todos/${id}`);
+};

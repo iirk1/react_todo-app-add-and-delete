@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
-import { getTodos, postTodos, USER_ID } from './api/todos';
+import { deleteTodos, getTodos, postTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
 import classNames from 'classnames';
 import { title } from 'process';
@@ -15,6 +15,8 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [isDisabled, setIsDisabled] = useState(false);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
+
+  const [isHover, setIsHover] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   enum FilterBy {
@@ -24,9 +26,9 @@ export const App: React.FC = () => {
     completed = 'completed',
   }
 
-  const handleFilter = (value: string) => {
-    if (value === FilterBy.clearCompleted) {
-      setTodos(todos.filter(todo => todo.completed === false));
+  const handleFilter = (todos?: Todo[], value: string) => {
+    if (value === FilterBy.completed) {
+      setTodos(allTodos.filter(todo => todo.completed));
     }
 
     if (value === FilterBy.all) {
@@ -59,6 +61,13 @@ export const App: React.FC = () => {
     return filteredTodos.length;
   };
 
+  const handleDelete = (id: number) => {
+    deleteTodos(id).then(() => {
+      setAllTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
+      setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
+    });
+  };
+
   useEffect(() => {
     getTodos()
       .then(res => {
@@ -68,8 +77,10 @@ export const App: React.FC = () => {
       .catch(() => {
         setErrorMessage('Unable to load todos');
       });
-    inputRef.current?.focus();
-  }, []);
+    if (query.length === 0) {
+      inputRef.current?.focus();
+    }
+  }, [query]);
 
   useEffect(() => {
     if (errorMessage) {
@@ -102,11 +113,14 @@ export const App: React.FC = () => {
           <form
             onSubmit={event => {
               event.preventDefault();
+
               if (query.trim().length === 0) {
                 setErrorMessage('Title should not be empty');
 
                 return;
               }
+
+              setIsDisabled(true);
 
               const newTempTodo = {
                 id: 0,
@@ -116,13 +130,19 @@ export const App: React.FC = () => {
               };
 
               setTempTodo(newTempTodo);
+              setIsDisabled(true);
               postTodos(query.trim())
                 .then((newTodo: Todo) => {
                   setQuery('');
                   inputRef.current?.focus();
-                  setIsDisabled(true);
-                  setTodos(previosTodos => [...previosTodos, newTodo]);
-                  setAllTodos(previosTodos => [...previosTodos, newTodo]);
+                  setAllTodos(prevTodos => {
+                    const updatedTodos = [...prevTodos, newTodo];
+                    // Оновлюємо фільтрований список одразу після оновлення allTodos
+
+                    setTodos(handleFilter(updatedTodos, filterName));
+
+                    return updatedTodos;
+                  });
                 })
                 .catch(() => {
                   setErrorMessage('Unable to add a todo');
@@ -131,6 +151,9 @@ export const App: React.FC = () => {
                 .finally(() => {
                   setTempTodo(null);
                   setIsDisabled(false);
+                  setTimeout(() => {
+                    inputRef.current?.focus();
+                  }, 0);
                 });
             }}
           >
@@ -151,6 +174,7 @@ export const App: React.FC = () => {
           {todos.map((todo: Todo) => {
             return (
               <div
+                onMouseEnter={() => setIsHover(true)}
                 data-cy="Todo"
                 key={todo.id}
                 className={classNames('todo', { completed: todo.completed })}
@@ -171,8 +195,13 @@ export const App: React.FC = () => {
                 {/* Remove button appears only on hover */}
                 <button
                   type="button"
-                  className="todo__remove"
+                  className={classNames('todo__remove', {
+                    'is-hidden': !isHover,
+                  })}
                   data-cy="TodoDelete"
+                  onClick={() => {
+                    handleDelete(todo.id);
+                  }}
                 >
                   ×
                 </button>
@@ -186,9 +215,37 @@ export const App: React.FC = () => {
             );
           })}
           {tempTodo && (
-            <div data-cy="Todo" className="todo">
-              <span className="todo__title">{tempTodo.title}</span>
-              <div className="modal overlay is-active">
+            <div
+              data-cy="Todo"
+              className={classNames('todo', { completed: tempTodo.completed })}
+              key={tempTodo.id}
+            >
+              <label className="todo__status-label">
+                <input
+                  data-cy="TodoStatus"
+                  type="checkbox"
+                  className="todo__status"
+                  // checked={completed}
+                  // onChange={onToggle}
+                />
+              </label>
+              <span data-cy="TodoTitle" className="todo__title">
+                {tempTodo.title}
+              </span>
+              <button
+                type="button"
+                className="todo__remove"
+                data-cy="TodoDelete"
+                // onClick={() => handleDelete(id)}
+              >
+                ×
+              </button>
+              <div
+                data-cy="TodoLoader"
+                className={classNames('modal overlay', {
+                  'is-active': true,
+                })}
+              >
                 <div className="modal-background has-background-white-ter" />
                 <div className="loader" />
               </div>
