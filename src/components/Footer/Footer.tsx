@@ -4,16 +4,20 @@ import { Filter } from '../../types/Filter';
 
 type Props = {
   filterName: string;
+  countOfCompletedTodos: () => number;
   handleFilter: (value: string) => void;
   setFilterName: React.Dispatch<SetStateAction<string>>;
   countOfNotCompletedTodos: () => number;
+  handleClearCompleted: () => void;
 };
 
 export const Footer: React.FC<Props> = ({
   filterName,
+  countOfCompletedTodos,
   setFilterName,
   handleFilter,
   countOfNotCompletedTodos,
+  handleClearCompleted,
 }) => {
   return (
     <footer className="todoapp__footer" data-cy="Footer">
@@ -69,9 +73,10 @@ export const Footer: React.FC<Props> = ({
       {/* this button should be disabled if there are no completed todos */}
       <button
         type="button"
+        disabled={countOfCompletedTodos() <= 0}
         className="todoapp__clear-completed"
         data-cy="ClearCompletedButton"
-        onClick={() => {}}
+        onClick={() => handleClearCompleted()}
       >
         Clear completed
       </button>

@@ -46,7 +46,7 @@ export const TodoList: React.FC<Props> = ({
             <button
               type="button"
               className={classNames('todo__remove', {
-                'is-hidden': !isHover,
+                'is-active': !isHover,
               })}
               data-cy="TodoDelete"
               onClick={() => {
@@ -57,12 +57,16 @@ export const TodoList: React.FC<Props> = ({
             </button>
 
             {/* overlay will cover the todo while it is being deleted or updated */}
-            {deletedTodoId === todo.id && (
-              <div data-cy="TodoLoader" className="modal overlay">
-                <div className="modal-background has-background-white-ter" />
-                <div className="loader" />
-              </div>
-            )}
+
+            <div
+              data-cy="TodoLoader"
+              className={classNames('modal overlay', {
+                'is-active': deletedTodoId === todo.id,
+              })}
+            >
+              <div className="modal-background has-background-white-ter" />
+              <div className="loader" />
+            </div>
           </div>
         );
       })}

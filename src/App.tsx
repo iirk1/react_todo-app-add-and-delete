@@ -25,34 +25,6 @@ export const App: React.FC = () => {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleFilter = (value: string) => {
-    if (value === Filter.completed) {
-      setFilteredTodos(allTodos.filter(todo => todo.completed));
-    }
-
-    if (value === Filter.all) {
-      setFilteredTodos(
-        allTodos.filter(todo => {
-          return todo;
-        }),
-      );
-    }
-
-    if (value === Filter.active) {
-      setFilteredTodos(
-        allTodos.filter(todo => {
-          return todo.completed === false;
-        }),
-      );
-    }
-  };
-
-  const countOfNotCompletedTodos = () => {
-    const filteredTodos = allTodos.filter(todo => todo.completed === false);
-
-    return filteredTodos.length;
-  };
-
   const handleDelete = (id: number) => {
     setDeletedTodoId(id);
     deleteTodos(id)
@@ -60,39 +32,14 @@ export const App: React.FC = () => {
         setAllTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
         setFilteredTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
       })
+      .catch(() => {
+        setErrorMessage('Unable to delete a todo');
+      })
       .finally(() => {
         setDeletedTodoId(null);
+        inputRef.current?.focus();
       });
   };
-
-  useEffect(() => {
-    handleFilter(filterName);
-  }, [filterName, allTodos]);
-
-  useEffect(() => {
-    getTodos()
-      .then(res => {
-        setAllTodos(res);
-        inputRef.current?.focus();
-      })
-      .catch(() => {
-        setErrorMessage('Unable to load todos');
-      });
-  }, []);
-
-  useEffect(() => {
-    if (errorMessage) {
-      const timeOutId = setTimeout(() => {
-        setErrorMessage('');
-      }, 3000);
-
-      return () => clearTimeout(timeOutId);
-    }
-  }, [errorMessage]);
-
-  if (!USER_ID) {
-    return <UserWarning />;
-  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -133,6 +80,79 @@ export const App: React.FC = () => {
       });
   };
 
+  const handleFilter = (value: string) => {
+    if (value === Filter.completed) {
+      setFilteredTodos(allTodos.filter(todo => todo.completed));
+    }
+
+    if (value === Filter.all) {
+      setFilteredTodos(
+        allTodos.filter(todo => {
+          return todo;
+        }),
+      );
+    }
+
+    if (value === Filter.active) {
+      setFilteredTodos(
+        allTodos.filter(todo => {
+          return todo.completed === false;
+        }),
+      );
+    }
+  };
+
+  const handleClearCompleted = () => {
+    allTodos.forEach(todo => {
+      if (todo.completed) {
+        handleDelete(todo.id);
+      }
+    });
+  };
+
+  const countOfNotCompletedTodos = () => {
+    const filteredTodosNotCompleted = allTodos.filter(
+      todo => todo.completed === false,
+    );
+
+    return filteredTodosNotCompleted.length;
+  };
+
+  const countOfCompletedTodos = () => {
+    const filteredTodosCompleted = allTodos.filter(todo => todo.completed);
+
+    return filteredTodosCompleted.length;
+  };
+
+  useEffect(() => {
+    handleFilter(filterName);
+  }, [filterName, allTodos]);
+
+  useEffect(() => {
+    getTodos()
+      .then(res => {
+        setAllTodos(res);
+        inputRef.current?.focus();
+      })
+      .catch(() => {
+        setErrorMessage('Unable to load todos');
+      });
+  }, []);
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timeOutId = setTimeout(() => {
+        setErrorMessage('');
+      }, 3000);
+
+      return () => clearTimeout(timeOutId);
+    }
+  }, [errorMessage]);
+
+  if (!USER_ID) {
+    return <UserWarning />;
+  }
+
   return (
     <div className="todoapp">
       <h1 className="todoapp__title">todos</h1>
@@ -157,7 +177,9 @@ export const App: React.FC = () => {
 
         {allTodos.length !== 0 && (
           <Footer
+            countOfCompletedTodos={countOfCompletedTodos}
             filterName={filterName}
+            handleClearCompleted={handleClearCompleted}
             handleFilter={handleFilter}
             setFilterName={setFilterName}
             countOfNotCompletedTodos={countOfNotCompletedTodos}
