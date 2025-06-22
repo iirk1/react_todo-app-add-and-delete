@@ -29,6 +29,7 @@ export const TodoList: React.FC<Props> = ({
             key={todo.id}
             className={classNames('todo', { completed: todo.completed })}
           >
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <label className="todo__status-label">
               <input
                 data-cy="TodoStatus"
@@ -76,13 +77,12 @@ export const TodoList: React.FC<Props> = ({
           className={classNames('todo', { completed: tempTodo.completed })}
           key={tempTodo.id}
         >
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label className="todo__status-label">
             <input
               data-cy="TodoStatus"
               type="checkbox"
               className="todo__status"
-              // checked={completed}
-              // onChange={onToggle}
             />
           </label>
           <span data-cy="TodoTitle" className="todo__title">
