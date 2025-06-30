@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { deleteTodos, getTodos, postTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
@@ -80,35 +80,38 @@ export const App: React.FC = () => {
       });
   };
 
-  const handleFilter = (value: string) => {
-    switch (value) {
-      case Filter.completed:
-        setFilteredTodos(allTodos.filter(todo => todo.completed));
-        break;
-      case Filter.all:
-        setFilteredTodos(
-          allTodos.filter(todo => {
-            return todo;
-          }),
-        );
-        break;
+  const handleFilter = useCallback(
+    (value: string) => {
+      switch (value) {
+        case Filter.completed:
+          setFilteredTodos(allTodos.filter(todo => todo.completed));
+          break;
+        case Filter.all:
+          setFilteredTodos(
+            allTodos.filter(todo => {
+              return todo;
+            }),
+          );
+          break;
 
-      case Filter.active:
-        setFilteredTodos(
-          allTodos.filter(todo => {
-            return !todo.completed;
-          }),
-        );
-        break;
+        case Filter.active:
+          setFilteredTodos(
+            allTodos.filter(todo => {
+              return !todo.completed;
+            }),
+          );
+          break;
 
-      default:
-        setFilteredTodos(
-          allTodos.filter(todo => {
-            return todo;
-          }),
-        );
-    }
-  };
+        default:
+          setFilteredTodos(
+            allTodos.filter(todo => {
+              return todo;
+            }),
+          );
+      }
+    },
+    [allTodos],
+  );
 
   const handleClearCompleted = () => {
     allTodos.forEach(todo => {
