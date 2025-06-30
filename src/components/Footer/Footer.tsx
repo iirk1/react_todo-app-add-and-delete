@@ -25,52 +25,25 @@ export const Footer: React.FC<Props> = ({
         {countOfNotCompletedTodos()} items left
       </span>
 
-      {/* Active link should have the 'selected' class */}
       <nav className="filter" data-cy="Filter">
-        <a
-          href="#/"
-          className={classNames('filter__link', {
-            selected: filterName === Filter.all,
-          })}
-          data-cy="FilterLinkAll"
-          onClick={() => {
-            setFilterName(Filter.all);
-            handleFilter(Filter.all);
-          }}
-        >
-          All
-        </a>
-
-        <a
-          href="#/active"
-          className={classNames('filter__link', {
-            selected: filterName === Filter.active,
-          })}
-          data-cy="FilterLinkActive"
-          onClick={() => {
-            setFilterName(Filter.active);
-            handleFilter(Filter.active);
-          }}
-        >
-          Active
-        </a>
-
-        <a
-          href="#/completed"
-          className={classNames('filter__link', {
-            selected: filterName === Filter.completed,
-          })}
-          data-cy="FilterLinkCompleted"
-          onClick={() => {
-            setFilterName(Filter.completed);
-            handleFilter(Filter.completed);
-          }}
-        >
-          Completed
-        </a>
+        {Object.values(Filter).map(filterOption => (
+          <a
+            key={filterOption}
+            href={`#/${filterOption}`}
+            className={classNames('filter__link', {
+              selected: filterName === filterOption,
+            })}
+            data-cy={`FilterLink-${filterOption}`}
+            onClick={() => {
+              setFilterName(filterOption);
+              handleFilter(filterOption);
+            }}
+          >
+            {filterOption}
+          </a>
+        ))}
       </nav>
 
-      {/* this button should be disabled if there are no completed todos */}
       <button
         type="button"
         disabled={countOfCompletedTodos() <= 0}

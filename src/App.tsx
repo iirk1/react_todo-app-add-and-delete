@@ -81,24 +81,32 @@ export const App: React.FC = () => {
   };
 
   const handleFilter = (value: string) => {
-    if (value === Filter.completed) {
-      setFilteredTodos(allTodos.filter(todo => todo.completed));
-    }
+    switch (value) {
+      case Filter.completed:
+        setFilteredTodos(allTodos.filter(todo => todo.completed));
+        break;
+      case Filter.all:
+        setFilteredTodos(
+          allTodos.filter(todo => {
+            return todo;
+          }),
+        );
+        break;
 
-    if (value === Filter.all) {
-      setFilteredTodos(
-        allTodos.filter(todo => {
-          return todo;
-        }),
-      );
-    }
+      case Filter.active:
+        setFilteredTodos(
+          allTodos.filter(todo => {
+            return !todo.completed;
+          }),
+        );
+        break;
 
-    if (value === Filter.active) {
-      setFilteredTodos(
-        allTodos.filter(todo => {
-          return todo.completed === false;
-        }),
-      );
+      default:
+        setFilteredTodos(
+          allTodos.filter(todo => {
+            return todo;
+          }),
+        );
     }
   };
 
@@ -111,9 +119,7 @@ export const App: React.FC = () => {
   };
 
   const countOfNotCompletedTodos = () => {
-    const filteredTodosNotCompleted = allTodos.filter(
-      todo => todo.completed === false,
-    );
+    const filteredTodosNotCompleted = allTodos.filter(todo => !todo.completed);
 
     return filteredTodosNotCompleted.length;
   };
@@ -126,7 +132,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     handleFilter(filterName);
-  }, [filterName, allTodos]);
+  }, [filterName, allTodos, handleFilter]);
 
   useEffect(() => {
     getTodos()
