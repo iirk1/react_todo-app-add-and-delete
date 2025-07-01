@@ -16,7 +16,7 @@ export const App: React.FC = () => {
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
 
   const [query, setQuery] = useState('');
-  const [filterName, setFilterName] = useState('all');
+  const [filterName, setFilterName] = useState(Filter.all);
   const [errorMessage, setErrorMessage] = useState('');
   const [deletedTodoId, setDeletedTodoId] = useState<number | null>(null);
 
