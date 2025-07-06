@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/control-has-associated-label */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { UserWarning } from './UserWarning';
 import { deleteTodos, getTodos, postTodos, USER_ID } from './api/todos';
 import { Todo } from './types/Todo';
@@ -12,7 +12,6 @@ import { Filter } from './types/Filter';
 
 export const App: React.FC = () => {
   const [allTodos, setAllTodos] = useState<Todo[]>([]);
-  const [filteredTodos, setFilteredTodos] = useState<Todo[]>([]);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
 
   const [query, setQuery] = useState('');
@@ -30,7 +29,6 @@ export const App: React.FC = () => {
     deleteTodos(id)
       .then(() => {
         setAllTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
-        setFilteredTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
       })
       .catch(() => {
         setErrorMessage('Unable to delete a todo');
@@ -80,38 +78,16 @@ export const App: React.FC = () => {
       });
   };
 
-  const handleFilter = useCallback(
-    (value: string) => {
-      switch (value) {
-        case Filter.completed:
-          setFilteredTodos(allTodos.filter(todo => todo.completed));
-          break;
-        case Filter.all:
-          setFilteredTodos(
-            allTodos.filter(todo => {
-              return todo;
-            }),
-          );
-          break;
-
-        case Filter.active:
-          setFilteredTodos(
-            allTodos.filter(todo => {
-              return !todo.completed;
-            }),
-          );
-          break;
-
-        default:
-          setFilteredTodos(
-            allTodos.filter(todo => {
-              return todo;
-            }),
-          );
-      }
-    },
-    [allTodos],
-  );
+  const filteredTodos = allTodos.filter(todo => {
+    switch (filterName) {
+      case Filter.completed:
+        return todo.completed;
+      case Filter.active:
+        return !todo.completed;
+      default:
+        return true;
+    }
+  });
 
   const handleClearCompleted = () => {
     allTodos.forEach(todo => {
@@ -132,10 +108,6 @@ export const App: React.FC = () => {
 
     return filteredTodosCompleted.length;
   };
-
-  useEffect(() => {
-    handleFilter(filterName);
-  }, [filterName, allTodos, handleFilter]);
 
   useEffect(() => {
     getTodos()
@@ -189,7 +161,6 @@ export const App: React.FC = () => {
             countOfCompletedTodos={countOfCompletedTodos}
             filterName={filterName}
             handleClearCompleted={handleClearCompleted}
-            handleFilter={handleFilter}
             setFilterName={setFilterName}
             countOfNotCompletedTodos={countOfNotCompletedTodos}
           />

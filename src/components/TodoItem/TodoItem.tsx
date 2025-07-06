@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { Todo } from '../../types/Todo';
 import { SetStateAction } from 'react';
+import { Loader } from '../Loader/Loader';
 
 type Props = {
   isHover: boolean;
@@ -8,6 +9,7 @@ type Props = {
   setIsHover: React.Dispatch<SetStateAction<boolean>>;
   handleDelete: (id: number) => void;
   todo: Todo;
+  isTempTodo: boolean;
 };
 
 export const TodoItem: React.FC<Props> = ({
@@ -15,14 +17,15 @@ export const TodoItem: React.FC<Props> = ({
   deletedTodoId,
   setIsHover,
   handleDelete,
-  todo,
+  todo: { id, title, completed },
+  isTempTodo,
 }) => {
   return (
     <div
       onMouseEnter={() => setIsHover(true)}
       data-cy="Todo"
-      key={todo.id}
-      className={classNames('todo', { completed: todo.completed })}
+      key={id}
+      className={classNames('todo', { completed: completed })}
     >
       {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
       <label className="todo__status-label">
@@ -30,12 +33,12 @@ export const TodoItem: React.FC<Props> = ({
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          checked={todo.completed}
+          checked={completed}
         />
       </label>
 
       <span data-cy="TodoTitle" className="todo__title">
-        {todo.title}
+        {title}
       </span>
 
       <button
@@ -45,21 +48,12 @@ export const TodoItem: React.FC<Props> = ({
         })}
         data-cy="TodoDelete"
         onClick={() => {
-          handleDelete(todo.id);
+          handleDelete(id);
         }}
       >
         ×
       </button>
-
-      <div
-        data-cy="TodoLoader"
-        className={classNames('modal overlay', {
-          'is-active': deletedTodoId === todo.id,
-        })}
-      >
-        <div className="modal-background has-background-white-ter" />
-        <div className="loader" />
-      </div>
+      <Loader isActive={isTempTodo || deletedTodoId === id} />
     </div>
   );
 };

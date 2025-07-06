@@ -5,8 +5,7 @@ import { Filter } from '../../types/Filter';
 type Props = {
   filterName: string;
   countOfCompletedTodos: () => number;
-  handleFilter: (value: string) => void;
-  setFilterName: React.Dispatch<SetStateAction<string>>;
+  setFilterName: React.Dispatch<SetStateAction<Filter>>;
   countOfNotCompletedTodos: () => number;
   handleClearCompleted: () => void;
 };
@@ -15,7 +14,6 @@ export const Footer: React.FC<Props> = ({
   filterName,
   countOfCompletedTodos,
   setFilterName,
-  handleFilter,
   countOfNotCompletedTodos,
   handleClearCompleted,
 }) => {
@@ -36,7 +34,6 @@ export const Footer: React.FC<Props> = ({
             data-cy={`FilterLink${filterOption}`}
             onClick={() => {
               setFilterName(filterOption);
-              handleFilter(filterOption);
             }}
           >
             {filterOption}
@@ -49,7 +46,7 @@ export const Footer: React.FC<Props> = ({
         disabled={countOfCompletedTodos() <= 0}
         className="todoapp__clear-completed"
         data-cy="ClearCompletedButton"
-        onClick={() => handleClearCompleted()}
+        onClick={handleClearCompleted}
       >
         Clear completed
       </button>

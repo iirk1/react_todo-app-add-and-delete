@@ -1,4 +1,3 @@
-import classNames from 'classnames';
 import { Todo } from '../../types/Todo';
 import { SetStateAction } from 'react';
 import { TodoItem } from '../TodoItem/TodoItem';
@@ -24,6 +23,7 @@ export const TodoList: React.FC<Props> = ({
     <section className="todoapp__main" data-cy="TodoList">
       {filteredTodos.map((todo: Todo) => (
         <TodoItem
+          isTempTodo={false}
           key={todo.id}
           isHover={isHover}
           todo={todo}
@@ -33,40 +33,14 @@ export const TodoList: React.FC<Props> = ({
         />
       ))}
       {tempTodo && (
-        <div
-          data-cy="Todo"
-          className={classNames('todo', { completed: tempTodo.completed })}
-          key={tempTodo.id}
-        >
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label className="todo__status-label">
-            <input
-              data-cy="TodoStatus"
-              type="checkbox"
-              className="todo__status"
-            />
-          </label>
-          <span data-cy="TodoTitle" className="todo__title">
-            {tempTodo.title}
-          </span>
-          <button
-            type="button"
-            className="todo__remove"
-            data-cy="TodoDelete"
-            // onClick={() => handleDelete(id)}
-          >
-            ×
-          </button>
-          <div
-            data-cy="TodoLoader"
-            className={classNames('modal overlay', {
-              'is-active': true,
-            })}
-          >
-            <div className="modal-background has-background-white-ter" />
-            <div className="loader" />
-          </div>
-        </div>
+        <TodoItem
+          todo={tempTodo}
+          isHover={isHover}
+          deletedTodoId={deletedTodoId}
+          setIsHover={setIsHover}
+          handleDelete={handleDelete}
+          isTempTodo={true}
+        />
       )}
     </section>
   );
